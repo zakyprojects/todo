@@ -535,6 +535,11 @@ body {
     #sidebar h1.bar {
         font-size: 24px;
     }
+
+    /* UPDATED: Allow task content to wrap onto a new line */
+    .task-item-container {
+        flex-wrap: wrap;
+    }
     
     .list-link {
         font-size: 16px;
@@ -545,15 +550,24 @@ body {
         font-size: 20px;
         padding: 12px;
     }
-    .task-text-wrapper { padding: 12px; }
+
+    .task-text-wrapper { 
+        padding: 12px 12px 5px 12px; /* Adjusted padding */
+        flex-grow: 1;
+        min-width: 60%;
+    }
+
     .task-item-text { font-size: 15px; }
     
-    /* This is the key change */
+    /* UPDATED: Force actions to new line and align right */
     .task-actions {
+        flex-basis: 100%;
+        display: flex;
         flex-direction: row;
         align-items: center;
+        justify-content: flex-end;
         gap: 8px;
-        padding: 10px 10px 10px 0;
+        padding: 0px 10px 8px 0;
     }
     
     .notes-btn {

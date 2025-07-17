@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
             "All": { active: [], completed: [] }, // "All" is now just a placeholder
             "Important": { active: [], completed: [] },
             "Planned": { 
-                active: [{ text: "This is a planned task", dueDate: "", notes: "" }],
+                active: [{ text: "This is a planned task", dueDate: "2025-07-20", notes: "" }],
                 completed: []
             }
         };
