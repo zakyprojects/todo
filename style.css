@@ -520,20 +520,29 @@ body {
     }
 
     .main-content {
-        margin-left: 55px;
-        padding-bottom: 100px;
+        /* UPDATED: Removed left margin for full-width layout */
+        margin-left: 0;
+        /* UPDATED: Adjusted padding for full-width layout */
+        padding: 10px 15px 100px 15px;
     }
 
     .main-content h1 {
         font-size: 28px;
+        margin-top: 15px;
+        margin-bottom: 15px;
+        /* UPDATED: Indent heading to avoid the toggle button */
+        margin-left: 55px;
     }
+
     #sidebar h1.bar {
         font-size: 24px;
     }
+    
     .list-link {
         font-size: 16px;
         padding: 8px;
     }
+
     .tick-icon {
         font-size: 20px;
         padding: 12px;
@@ -564,7 +573,8 @@ body {
     }
 
     #sidebar.active~.main-content {
-        margin-left: 55px;
+        /* UPDATED: Filter/pointer-events still work, but margin is now 0 */
+        margin-left: 0;
         filter: brightness(0.4);
         pointer-events: none;
     }
@@ -572,7 +582,8 @@ body {
     #addTask {
         margin-left: 0;
         width: 100%;
-        padding: 15px 10px;
+        /* UPDATED: Match horizontal padding of .main-content */
+        padding: 15px;
     }
 
     #addTask form {

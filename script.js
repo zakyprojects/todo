@@ -44,24 +44,32 @@ document.addEventListener('DOMContentLoaded', () => {
         mainContent.innerHTML = `<h1 class="main-heading">${currentList}</h1>`;
         const tasksContainer = document.createElement('div');
         tasksContainer.className = 'tasks-container';
+        
+        // Always show the add task form
+        addTaskContainer.style.display = 'flex';
 
         // Special logic for the "All" view
         if (currentList === "All") {
-            addTaskContainer.style.display = 'none'; // Hide "Add Task" form
             let allActive = [];
             let allCompleted = [];
 
-            // Aggregate tasks from all other lists
+            // Aggregate tasks from all other lists, keeping their original index and source
             Object.keys(tasks).forEach(listName => {
                 if (listName !== "All") {
-                    tasks[listName].active.forEach(task => allActive.push({ ...task, sourceList: listName }));
-                    tasks[listName].completed.forEach(task => allCompleted.push({ ...task, sourceList: listName }));
+                    tasks[listName].active.forEach((task, index) => {
+                        allActive.push({ taskData: task, originalIndex: index, sourceList: listName });
+                    });
+                    tasks[listName].completed.forEach((task, index) => {
+                        allCompleted.push({ taskData: task, originalIndex: index, sourceList: listName });
+                    });
                 }
             });
 
             // Render aggregated lists
             if (allActive.length > 0) {
-                allActive.forEach(task => tasksContainer.appendChild(createTaskElement(task, -1, false, task.sourceList)));
+                 allActive.forEach(item => {
+                    tasksContainer.appendChild(createTaskElement(item.taskData, item.originalIndex, false, item.sourceList));
+                });
             } else {
                 const emptyMessage = document.createElement('p');
                 emptyMessage.textContent = 'No active tasks across all lists!';
@@ -76,15 +84,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 completedToggle.innerHTML = `<span>&#9662;</span> Completed (${allCompleted.length})`;
                 const completedTasksContainer = document.createElement('div');
                 completedTasksContainer.className = 'completed-tasks-container';
-                allCompleted.forEach(task => completedTasksContainer.appendChild(createTaskElement(task, -1, true, task.sourceList)));
+                allCompleted.forEach(item => {
+                    completedTasksContainer.appendChild(createTaskElement(item.taskData, item.originalIndex, true, item.sourceList));
+                });
                 completedSection.appendChild(completedToggle);
                 completedSection.appendChild(completedTasksContainer);
                 tasksContainer.appendChild(completedSection);
             }
 
         } else { // Logic for all other normal lists
-            addTaskContainer.style.display = 'flex'; // Show "Add Task" form
-            
             if (tasks[currentList].active.length > 0) {
                 tasks[currentList].active.forEach((task, index) => {
                     tasksContainer.appendChild(createTaskElement(task, index, false));
@@ -132,10 +140,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if(isCompleted) taskContainer.classList.add('task-is-completed');
 
         if (task.dueDate && !isCompleted) {
-            const today = new Date(); const dueDate = new Date(task.dueDate);
-            today.setHours(0,0,0,0); dueDate.setHours(1,0,0,0);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const dateParts = task.dueDate.split('-');
+            const dueDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+            dueDate.setHours(0, 0, 0, 0);
+        
             const diffTime = dueDate.getTime() - today.getTime();
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+        
             if (diffDays < 0) taskContainer.classList.add('overdue');
             else if (diffDays === 0) taskContainer.classList.add('due-today');
             else taskContainer.classList.add('due-future');
@@ -180,11 +193,25 @@ document.addEventListener('DOMContentLoaded', () => {
             if (task.dueDate) {
                 const dateTextSpan = document.createElement('span');
                 dateTextSpan.className = 'due-date-text';
-                const today = new Date(); const dueDate = new Date(task.dueDate);
-                today.setHours(0,0,0,0); dueDate.setHours(1,0,0,0);
+
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const dateParts = task.dueDate.split('-');
+                const dueDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+                dueDate.setHours(0, 0, 0, 0);
+
                 const diffTime = dueDate.getTime() - today.getTime();
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                dateTextSpan.textContent = diffDays < 0 ? 'Overdue' : (diffDays === 0 ? 'Due Today' : `${diffDays} day${diffDays > 1 ? 's' : ''} left`);
+                const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+                if (diffDays < 0) {
+                    const daysOverdue = Math.abs(diffDays);
+                    dateTextSpan.textContent = `${daysOverdue} day${daysOverdue > 1 ? 's' : ''} overdue`;
+                } else if (diffDays === 0) {
+                    dateTextSpan.textContent = 'Due Today';
+                } else {
+                    dateTextSpan.textContent = `${diffDays} day${diffDays > 1 ? 's' : ''} left`;
+                }
+                
                 dateGroup.appendChild(dateTextSpan);
             }
             const dateInput = document.createElement('input');
@@ -207,9 +234,6 @@ document.addEventListener('DOMContentLoaded', () => {
         taskWrapper.appendChild(notesArea);
         return taskWrapper;
     }
-    
-    // All other functions like renderSidebar, handleRename, etc. remain the same,
-    // but the main click handler needs to be updated.
     
     const renderSidebar = () => {
         listContainer.innerHTML = '';
@@ -238,7 +262,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     const handleRename = (element, originalText, isList = false) => {
-        // ... (This function needs to be updated to handle the new data structure when renaming a task)
         const input = document.createElement('input');
         input.type = 'text'; input.value = originalText;
         if (element.classList.contains('main-heading')) input.className = 'h1-main-edit-input';
@@ -276,8 +299,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
     
-    // ... (All other event listeners and functions need to be checked for compatibility)
-    // The main click handler needs the biggest update
     mainContent.addEventListener('click', (e) => {
         const target = e.target;
         if (target.classList.contains('completed-toggle')) {
@@ -341,15 +362,15 @@ document.addEventListener('DOMContentLoaded', () => {
     addTaskForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const newTaskText = taskInput.value.trim();
-        if (newTaskText !== "" && currentList !== "All") { // Prevent adding to "All"
-            tasks[currentList].active.push({ text: newTaskText, dueDate: "", notes: "" });
+        if (newTaskText !== "") {
+            const listToAdd = currentList === "All" ? "Important" : currentList;
+            tasks[listToAdd].active.push({ text: newTaskText, dueDate: "", notes: "" });
             taskInput.value = "";
-            saveData(); renderTasks();
+            saveData(); 
+            renderTasks();
         }
     });
     
-    // (The rest of the file remains the same)
-    // ...
     let lastTap = 0;
     const handleDoubleClick = (e) => {
         const target = e.target;
