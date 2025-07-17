@@ -23,7 +23,7 @@ body {
 /* --- Sidebar & Toggle Button --- */
 #sidebar {
     width: 250px;
-    height: 100vh;
+    height: 100dvh; /* Changed from vh */
     background-color: rgb(0, 32, 32);
     padding: 20px;
     position: fixed;
@@ -66,7 +66,7 @@ body {
     padding: 15px;
     margin-left: 60px;
     transition: margin-left 0.3s ease-in-out;
-    height: calc(100vh - 100px);
+    height: calc(100dvh - 100px); /* Changed from vh */
     overflow-y: auto;
 }
 
@@ -535,11 +535,6 @@ body {
     #sidebar h1.bar {
         font-size: 24px;
     }
-
-    /* UPDATED: Allow task content to wrap onto a new line */
-    .task-item-container {
-        flex-wrap: wrap;
-    }
     
     .list-link {
         font-size: 16px;
@@ -552,33 +547,25 @@ body {
     }
 
     .task-text-wrapper { 
-        padding: 12px 12px 5px 12px; /* Adjusted padding */
-        flex-grow: 1;
-        min-width: 60%;
+        padding: 12px;
     }
 
     .task-item-text { font-size: 15px; }
     
-    /* UPDATED: Force actions to new line and align right */
+    /* Center the Notes button */
     .task-actions {
-        flex-basis: 100%;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: flex-end;
-        gap: 8px;
-        padding: 0px 10px 8px 0;
+        min-width: 90px;
+        justify-content: center;
     }
     
     .notes-btn {
         padding: 5px;
         font-size: 12px;
     }
+    
+    /* Hide the date group on mobile */
     .date-group {
-        gap: 5px;
-    }
-    .due-date-picker {
-        width: 20px;
+        display: none;
     }
 
     #newList {
