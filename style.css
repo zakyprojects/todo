@@ -520,17 +520,15 @@ body {
     }
 
     .main-content {
-        /* UPDATED: Removed left margin for full-width layout */
         margin-left: 0;
-        /* UPDATED: Adjusted padding for full-width layout */
         padding: 10px 15px 100px 15px;
     }
 
     .main-content h1 {
         font-size: 28px;
-        margin-top: 15px;
-        margin-bottom: 15px;
-        /* UPDATED: Indent heading to avoid the toggle button */
+        /* UPDATED: Adjusted margin for h1 alignment */
+        margin-top: 2px;
+        margin-bottom: 20px;
         margin-left: 55px;
     }
 
@@ -551,8 +549,9 @@ body {
     .task-item-text { font-size: 15px; }
     
     .task-actions {
-        flex-direction: column;
-        align-items: flex-end;
+        /* UPDATED: Changed to row to show all actions */
+        flex-direction: row;
+        align-items: center;
         gap: 8px;
         padding: 10px 10px 10px 0;
     }
@@ -573,7 +572,6 @@ body {
     }
 
     #sidebar.active~.main-content {
-        /* UPDATED: Filter/pointer-events still work, but margin is now 0 */
         margin-left: 0;
         filter: brightness(0.4);
         pointer-events: none;
@@ -582,7 +580,6 @@ body {
     #addTask {
         margin-left: 0;
         width: 100%;
-        /* UPDATED: Match horizontal padding of .main-content */
         padding: 15px;
     }
 
