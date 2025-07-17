@@ -510,6 +510,7 @@ body {
     }
 }
 
+/* --- MOBILE STYLES --- */
 @media (max-width: 480px) {
     #sidebar {
         width: 80vw;
@@ -526,7 +527,6 @@ body {
 
     .main-content h1 {
         font-size: 28px;
-        /* UPDATED: Adjusted margin for h1 alignment */
         margin-top: 2px;
         margin-bottom: 20px;
         margin-left: 55px;
@@ -548,8 +548,8 @@ body {
     .task-text-wrapper { padding: 12px; }
     .task-item-text { font-size: 15px; }
     
+    /* This is the key change */
     .task-actions {
-        /* UPDATED: Changed to row to show all actions */
         flex-direction: row;
         align-items: center;
         gap: 8px;
