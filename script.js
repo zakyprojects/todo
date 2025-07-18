@@ -387,21 +387,51 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (target.classList.contains('main-heading') && !protectedLists.includes(target.textContent)) handleRename(target, target.textContent, true);
         else if (target.classList.contains('task-item-text')) handleRename(target, target.textContent, false);
     };
+
     const renameUsername = (h1) => {
+        // On mobile, temporarily hide the toggle button to prevent overlap
+        if (window.innerWidth <= 480) {
+            toggleBtn.style.display = 'none';
+        }
+
         const originalText = h1.textContent;
         const input = document.createElement('input');
-        input.type = 'text'; input.value = originalText; input.className = 'h1-edit-input';
+        input.type = 'text';
+        input.value = originalText;
+        input.className = 'h1-edit-input';
         h1.replaceWith(input);
         input.focus();
-        const saveUsername = () => {
+
+        const onBlur = () => {
             const newText = input.value.trim();
             h1.textContent = newText ? newText : originalText;
             input.replaceWith(h1);
+            
+            // Restore the toggle button's visibility
+            if (window.innerWidth <= 480) {
+                toggleBtn.style.display = ''; // Revert to stylesheet default
+            }
             saveData();
+            // Clean up the other listener to avoid memory leaks
+            input.removeEventListener('keydown', onKeyDown);
         };
-        input.addEventListener('blur', saveUsername);
-        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') input.blur(); });
+
+        const onKeyDown = (e) => {
+            if (e.key === 'Enter' || e.key === 'Escape') {
+                if (e.key === 'Escape') {
+                    // Revert value before blur triggers save
+                    input.value = originalText;
+                }
+                // Programmatically blurring will trigger the onBlur listener
+                input.blur();
+            }
+        };
+        
+        // { once: true } ensures the blur listener only fires once and cleans itself up.
+        input.addEventListener('blur', onBlur, { once: true });
+        input.addEventListener('keydown', onKeyDown);
     };
+
     toggleBtn.addEventListener('click', () => sidebar.classList.toggle('active'));
     sidebar.addEventListener('click', (e) => {
         if (e.target.classList.contains('list-link') || e.target.parentElement.id === 'sidebarList') {

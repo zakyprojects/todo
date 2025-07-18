@@ -307,7 +307,7 @@ body {
 
 #addTask {
     position: fixed;
-    bottom: 0;
+    bottom: 40px; /* MODIFIED: Raised to make space for footer */
     left: 0;
     width: 100%;
     padding: 20px;
@@ -316,6 +316,7 @@ body {
     margin-left: 60px;
     width: calc(100% - 60px);
     transition: margin-left 0.3s ease-in-out, width 0.3s ease-in-out;
+    z-index: 999; /* ADDED: For stacking context */
 }
 
 #sidebar.active~#addTask {
@@ -484,6 +485,25 @@ body {
     line-height: 1.5;
 }
 
+/* --- Footer --- */
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgb(0, 32, 32);
+    padding: 10px 0;
+    text-align: center;
+    z-index: 998;
+}
+
+footer p {
+    font-style: normal;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+
 @keyframes fadeIn {
     from {opacity: 0;}
     to {opacity: 1;}
@@ -589,6 +609,11 @@ body {
     }
 
     #sidebar.active~#addTask {
+        display: none;
+    }
+
+    /* ADDED: Hides footer when sidebar is open on mobile */
+    #sidebar.active~footer {
         display: none;
     }
 
