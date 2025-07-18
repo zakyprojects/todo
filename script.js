@@ -45,36 +45,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const tasksContainer = document.createElement('div');
         tasksContainer.className = 'tasks-container';
         
-        // Always show the add task form
         addTaskContainer.style.display = 'flex';
 
-        // Special logic for the "All" view
         if (currentList === "All") {
             let allActive = [];
             let allCompleted = [];
-
-            // Aggregate tasks from all other lists, keeping their original index and source
             Object.keys(tasks).forEach(listName => {
                 if (listName !== "All") {
-                    tasks[listName].active.forEach((task, index) => {
-                        allActive.push({ taskData: task, originalIndex: index, sourceList: listName });
-                    });
-                    tasks[listName].completed.forEach((task, index) => {
-                        allCompleted.push({ taskData: task, originalIndex: index, sourceList: listName });
-                    });
+                    tasks[listName].active.forEach((task, index) => allActive.push({ taskData: task, originalIndex: index, sourceList: listName }));
+                    tasks[listName].completed.forEach((task, index) => allCompleted.push({ taskData: task, originalIndex: index, sourceList: listName }));
                 }
             });
 
-            // Render aggregated lists
             if (allActive.length > 0) {
-                 allActive.forEach(item => {
-                    tasksContainer.appendChild(createTaskElement(item.taskData, item.originalIndex, false, item.sourceList));
-                });
+                 allActive.forEach(item => tasksContainer.appendChild(createTaskElement(item.taskData, item.originalIndex, false, item.sourceList)));
             } else {
-                const emptyMessage = document.createElement('p');
-                emptyMessage.textContent = 'No active tasks across all lists!';
-                emptyMessage.className = 'task-item-empty';
-                tasksContainer.appendChild(emptyMessage);
+                tasksContainer.innerHTML = `<p class="task-item-empty">No active tasks across all lists!</p>`;
             }
             if (allCompleted.length > 0) {
                 const completedSection = document.createElement('div');
@@ -84,24 +70,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 completedToggle.innerHTML = `<span>&#9662;</span> Completed (${allCompleted.length})`;
                 const completedTasksContainer = document.createElement('div');
                 completedTasksContainer.className = 'completed-tasks-container';
-                allCompleted.forEach(item => {
-                    completedTasksContainer.appendChild(createTaskElement(item.taskData, item.originalIndex, true, item.sourceList));
-                });
-                completedSection.appendChild(completedToggle);
-                completedSection.appendChild(completedTasksContainer);
+                allCompleted.forEach(item => completedTasksContainer.appendChild(createTaskElement(item.taskData, item.originalIndex, true, item.sourceList)));
+                completedSection.append(completedToggle, completedTasksContainer);
                 tasksContainer.appendChild(completedSection);
             }
-
-        } else { // Logic for all other normal lists
+        } else { 
             if (tasks[currentList].active.length > 0) {
-                tasks[currentList].active.forEach((task, index) => {
-                    tasksContainer.appendChild(createTaskElement(task, index, false));
-                });
+                tasks[currentList].active.forEach((task, index) => tasksContainer.appendChild(createTaskElement(task, index, false)));
             } else {
-                const emptyMessage = document.createElement('p');
-                emptyMessage.textContent = 'No active tasks. Add one below!';
-                emptyMessage.className = 'task-item-empty';
-                tasksContainer.appendChild(emptyMessage);
+                tasksContainer.innerHTML = `<p class="task-item-empty">No active tasks. Add one below!</p>`;
             }
             if (tasks[currentList].completed.length > 0) {
                 const completedSection = document.createElement('div');
@@ -111,27 +88,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 completedToggle.innerHTML = `<span>&#9662;</span> Completed (${tasks[currentList].completed.length})`;
                 const completedTasksContainer = document.createElement('div');
                 completedTasksContainer.className = 'completed-tasks-container';
-                tasks[currentList].completed.forEach((task, index) => {
-                    completedTasksContainer.appendChild(createTaskElement(task, index, true));
-                });
-                completedSection.appendChild(completedToggle);
-                completedSection.appendChild(completedTasksContainer);
+                tasks[currentList].completed.forEach((task, index) => completedTasksContainer.appendChild(createTaskElement(task, index, true)));
+                completedSection.append(completedToggle, completedTasksContainer);
                 tasksContainer.appendChild(completedSection);
             }
-            // Only allow dragging in normal lists, not "All" view
             initDragAndDrop(tasksContainer, '.task-wrapper', reorderTasks);
         }
-
         mainContent.appendChild(tasksContainer);
     };
 
     function createTaskElement(task, index, isCompleted, sourceList = null) {
         const taskWrapper = document.createElement('div');
-        const isDraggable = !isCompleted && !sourceList; // Not draggable if completed or in "All" view
+        const isDraggable = !isCompleted && !sourceList;
         taskWrapper.className = `task-wrapper ${isDraggable ? 'draggable' : ''}`;
         taskWrapper.dataset.index = index;
         taskWrapper.dataset.type = isCompleted ? 'completed' : 'active';
-        // Pass sourceList info for event handling if it exists
         if(sourceList) taskWrapper.dataset.sourceList = sourceList;
         taskWrapper.draggable = isDraggable;
         
@@ -140,15 +111,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if(isCompleted) taskContainer.classList.add('task-is-completed');
 
         if (task.dueDate && !isCompleted) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const dateParts = task.dueDate.split('-');
-            const dueDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
-            dueDate.setHours(0, 0, 0, 0);
-        
-            const diffTime = dueDate.getTime() - today.getTime();
-            const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-        
+            const today = new Date(); today.setHours(0,0,0,0);
+            const dueDate = new Date(task.dueDate); dueDate.setHours(0,0,0,0);
+            const diffDays = Math.round((dueDate - today) / (1000 * 60 * 60 * 24));
             if (diffDays < 0) taskContainer.classList.add('overdue');
             else if (diffDays === 0) taskContainer.classList.add('due-today');
             else taskContainer.classList.add('due-future');
@@ -165,7 +130,6 @@ document.addEventListener('DOMContentLoaded', () => {
         taskElement.textContent = task.text;
         textWrapper.appendChild(taskElement);
 
-        // Add source list badge if in "All" view
         if (sourceList) {
             const sourceBadge = document.createElement('span');
             sourceBadge.className = 'task-source-badge';
@@ -193,25 +157,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (task.dueDate) {
                 const dateTextSpan = document.createElement('span');
                 dateTextSpan.className = 'due-date-text';
-
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                const dateParts = task.dueDate.split('-');
-                const dueDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
-                dueDate.setHours(0, 0, 0, 0);
-
-                const diffTime = dueDate.getTime() - today.getTime();
-                const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-
-                if (diffDays < 0) {
-                    const daysOverdue = Math.abs(diffDays);
-                    dateTextSpan.textContent = `${daysOverdue} day${daysOverdue > 1 ? 's' : ''} overdue`;
-                } else if (diffDays === 0) {
-                    dateTextSpan.textContent = 'Due Today';
-                } else {
-                    dateTextSpan.textContent = `${diffDays} day${diffDays > 1 ? 's' : ''} left`;
-                }
-                
+                const today = new Date(); today.setHours(0,0,0,0);
+                const dueDate = new Date(task.dueDate); dueDate.setHours(0,0,0,0);
+                const diffDays = Math.round((dueDate - today) / (1000 * 60 * 60 * 24));
+                if (diffDays < 0) dateTextSpan.textContent = `${Math.abs(diffDays)}d overdue`;
+                else if (diffDays === 0) dateTextSpan.textContent = 'Due Today';
+                else dateTextSpan.textContent = `${diffDays}d left`;
                 dateGroup.appendChild(dateTextSpan);
             }
             const dateInput = document.createElement('input');
@@ -230,15 +181,14 @@ document.addEventListener('DOMContentLoaded', () => {
         notesTextarea.value = task.notes || '';
         notesArea.appendChild(notesTextarea);
         
-        taskWrapper.appendChild(taskContainer);
-        taskWrapper.appendChild(notesArea);
+        taskWrapper.append(taskContainer, notesArea);
         return taskWrapper;
     }
     
     const renderSidebar = () => {
         listContainer.innerHTML = '';
         Object.keys(tasks).forEach(listName => {
-            if (!protectedLists.includes(listName) && listName !== "All") { // Exclude "All" from user list section
+            if (!protectedLists.includes(listName) && listName !== "All") {
                 const listElement = document.createElement('li');
                 listElement.textContent = listName;
                 listElement.className = 'list-link draggable';
@@ -249,19 +199,15 @@ document.addEventListener('DOMContentLoaded', () => {
         initDragAndDrop(listContainer, '.list-link', reorderLists);
     };
 
-    function initDragAndDrop(container, draggableSelector, onDropCallback) {
-        // ... (This function remains unchanged)
-    }
-
-    function reorderTasks(draggedEl, newIndex) {
-        // ... (This function remains unchanged)
-    }
-
-    function reorderLists(draggedEl, newIndex) {
-        // ... (This function remains unchanged)
-    }
+    function initDragAndDrop(container, draggableSelector, onDropCallback) { }
+    function reorderTasks(draggedEl, newIndex) { }
+    function reorderLists(draggedEl, newIndex) { }
     
     const handleRename = (element, originalText, isList = false) => {
+        if (isList && window.innerWidth <= 768) {
+            toggleBtn.style.display = 'none';
+        }
+
         const input = document.createElement('input');
         input.type = 'text'; input.value = originalText;
         if (element.classList.contains('main-heading')) input.className = 'h1-main-edit-input';
@@ -269,33 +215,51 @@ document.addEventListener('DOMContentLoaded', () => {
         else input.className = 'task-edit-input';
         element.replaceWith(input);
         input.focus();
-        const saveChanges = () => {
+
+        const finishEditing = () => {
+            if (isList && window.innerWidth <= 768) {
+                toggleBtn.style.display = '';
+            }
             const newText = input.value.trim();
-            if (!newText || newText === originalText) { if (isList) renderSidebar(); renderTasks(); return; }
+            if (!newText || newText === originalText) {
+                if (isList) renderSidebar();
+                renderTasks();
+                return;
+            }
             if (isList) {
-                if (tasks.hasOwnProperty(newText)) { alert('A list with this name already exists.'); renderSidebar(); } 
-                else {
+                if (tasks.hasOwnProperty(newText)) {
+                    alert('A list with this name already exists.');
+                    renderSidebar();
+                } else {
                     tasks[newText] = tasks[originalText];
                     delete tasks[originalText];
                     if (currentList === originalText) currentList = newText;
-                    saveData(); renderSidebar(); renderTasks();
-                }
-            } else { // Renaming a task
-                const taskWrapper = input.closest('.task-wrapper');
-                const taskIndex = parseInt(taskWrapper.dataset.index);
-                const taskType = taskWrapper.dataset.type;
-                const sourceList = taskWrapper.dataset.sourceList || currentList;
-                if (taskIndex > -1) {
-                    tasks[sourceList][taskType][taskIndex].text = newText;
                     saveData();
+                    renderSidebar();
+                }
+                renderTasks();
+            } else {
+                const taskWrapper = input.closest('.task-wrapper');
+                if (taskWrapper) {
+                    const taskIndex = parseInt(taskWrapper.dataset.index);
+                    const taskType = taskWrapper.dataset.type;
+                    const sourceList = taskWrapper.dataset.sourceList || currentList;
+                    if (taskIndex > -1) {
+                        tasks[sourceList][taskType][taskIndex].text = newText;
+                        saveData();
+                    }
                 }
                 renderTasks();
             }
         };
-        input.addEventListener('blur', saveChanges);
-        input.addEventListener('keydown', e => {
-            if (e.key === 'Enter') input.blur();
-            else if (e.key === 'Escape') { input.value = originalText; input.blur(); }
+
+        input.addEventListener('blur', finishEditing, { once: true });
+        input.addEventListener('keydown', function onKey(e) {
+            if (e.key === 'Enter' || e.key === 'Escape') {
+                if (e.key === 'Escape') input.value = originalText;
+                input.removeEventListener('keydown', onKey);
+                input.blur();
+            }
         });
     };
     
@@ -309,51 +273,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const taskWrapper = target.closest('.task-wrapper');
         if (!taskWrapper) return;
-
         const taskIndex = parseInt(taskWrapper.dataset.index);
         const taskType = taskWrapper.dataset.type;
-        // If we're in the "All" view, use the sourceList to modify the correct list
         const listToModify = taskWrapper.dataset.sourceList || currentList;
-
         if (target.classList.contains('tick-icon')) {
-            if(taskType === 'active') {
-                const [taskToComplete] = tasks[listToModify].active.splice(taskIndex, 1);
-                tasks[listToModify].completed.push(taskToComplete);
-            } else { // 'completed'
-                const [taskToRestore] = tasks[listToModify].completed.splice(taskIndex, 1);
-                tasks[listToModify].active.push(taskToRestore);
-            }
+            const [task] = tasks[listToModify][taskType].splice(taskIndex, 1);
+            const targetArray = taskType === 'active' ? 'completed' : 'active';
+            tasks[listToModify][targetArray].push(task);
             saveData(); renderTasks();
         } else if (target.classList.contains('notes-btn')) {
             const notesArea = taskWrapper.querySelector('.task-notes-area');
             notesArea.style.display = notesArea.style.display === 'block' ? 'none' : 'block';
-        } else if (target.classList.contains('delete-btn')) {
-            if(confirm('Are you sure you want to permanently delete this task?')) {
-                tasks[listToModify].completed.splice(taskIndex, 1);
-                saveData();
-                renderTasks();
-            }
+        } else if (target.classList.contains('delete-btn') && confirm('Are you sure you want to permanently delete this task?')) {
+            tasks[listToModify].completed.splice(taskIndex, 1);
+            saveData(); renderTasks();
         }
     });
 
     mainContent.addEventListener('change', (e) => {
-        const target = e.target; const taskWrapper = target.closest('.task-wrapper');
-        if (!taskWrapper) return;
-        const taskIndex = parseInt(taskWrapper.dataset.index);
-        const taskType = taskWrapper.dataset.type;
-        const listToModify = taskWrapper.dataset.sourceList || currentList;
-        if (target.classList.contains('due-date-picker')) {
+        const target = e.target;
+        const taskWrapper = target.closest('.task-wrapper');
+        if (taskWrapper && target.classList.contains('due-date-picker')) {
+            const taskIndex = parseInt(taskWrapper.dataset.index);
+            const taskType = taskWrapper.dataset.type;
+            const listToModify = taskWrapper.dataset.sourceList || currentList;
             tasks[listToModify][taskType][taskIndex].dueDate = target.value;
             saveData(); renderTasks();
         }
     });
     mainContent.addEventListener('input', (e) => {
-        const target = e.target; const taskWrapper = target.closest('.task-wrapper');
-        if (!taskWrapper) return;
-        const taskIndex = parseInt(taskWrapper.dataset.index);
-        const taskType = taskWrapper.dataset.type;
-        const listToModify = taskWrapper.dataset.sourceList || currentList;
-        if (target.tagName === 'TEXTAREA') {
+        const target = e.target;
+        const taskWrapper = target.closest('.task-wrapper');
+        if (taskWrapper && target.tagName === 'TEXTAREA') {
+            const taskIndex = parseInt(taskWrapper.dataset.index);
+            const taskType = taskWrapper.dataset.type;
+            const listToModify = taskWrapper.dataset.sourceList || currentList;
             tasks[listToModify][taskType][taskIndex].notes = target.value;
             saveData();
         }
@@ -366,8 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const listToAdd = currentList === "All" ? "Important" : currentList;
             tasks[listToAdd].active.push({ text: newTaskText, dueDate: "", notes: "" });
             taskInput.value = "";
-            saveData(); 
-            renderTasks();
+            saveData(); renderTasks();
         }
     });
     
@@ -389,59 +342,38 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const renameUsername = (h1) => {
-        // On mobile, temporarily hide the toggle button to prevent overlap
-        if (window.innerWidth <= 480) {
+        if (window.innerWidth <= 768) {
             toggleBtn.style.display = 'none';
         }
-
         const originalText = h1.textContent;
         const input = document.createElement('input');
-        input.type = 'text';
-        input.value = originalText;
-        input.className = 'h1-edit-input';
+        input.type = 'text'; input.value = originalText; input.className = 'h1-edit-input';
         h1.replaceWith(input);
         input.focus();
-
         const onBlur = () => {
             const newText = input.value.trim();
             h1.textContent = newText ? newText : originalText;
             input.replaceWith(h1);
-            
-            // Restore the toggle button's visibility
-            if (window.innerWidth <= 480) {
-                toggleBtn.style.display = ''; // Revert to stylesheet default
+            if (window.innerWidth <= 768) {
+                toggleBtn.style.display = '';
             }
             saveData();
-            // Clean up the other listener to avoid memory leaks
             input.removeEventListener('keydown', onKeyDown);
         };
-
         const onKeyDown = (e) => {
             if (e.key === 'Enter' || e.key === 'Escape') {
-                if (e.key === 'Escape') {
-                    // Revert value before blur triggers save
-                    input.value = originalText;
-                }
-                // Programmatically blurring will trigger the onBlur listener
+                if (e.key === 'Escape') input.value = originalText;
                 input.blur();
             }
         };
-        
-        // { once: true } ensures the blur listener only fires once and cleans itself up.
         input.addEventListener('blur', onBlur, { once: true });
         input.addEventListener('keydown', onKeyDown);
     };
 
     toggleBtn.addEventListener('click', () => sidebar.classList.toggle('active'));
     sidebar.addEventListener('click', (e) => {
-        if (e.target.classList.contains('list-link') || e.target.parentElement.id === 'sidebarList') {
-            let listName = e.target.textContent;
-            if (e.target.parentElement.id === 'sidebarList') { // Handle clicking the main list items
-                 if (e.target.textContent === 'All' || e.target.textContent === 'Important' || e.target.textContent === 'Planned') {
-                    listName = e.target.textContent;
-                 }
-            }
-             currentList = listName;
+        if (e.target.classList.contains('list-link')) {
+             currentList = e.target.textContent;
              renderTasks();
             if (window.innerWidth <= 480) sidebar.classList.remove('active');
         }
@@ -450,6 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
     sidebar.addEventListener('touchend', handleDoubleClick);
     mainContent.addEventListener('dblclick', handleDoubleClick);
     mainContent.addEventListener('touchend', handleDoubleClick);
+
     newListBtn.addEventListener('click', () => {
         if (document.querySelector('.new-list-input')) return;
         newListBtn.style.display = 'none';
@@ -471,15 +404,17 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         input.addEventListener('blur', saveNewList);
         input.addEventListener('keydown', e => {
-            if (e.key === 'Enter') input.blur();
-            if (e.key === 'Escape') { input.value = ''; input.blur(); }
+            if (e.key === 'Enter' || e.key === 'Escape') {
+                input.value = (e.key === 'Escape' ? '' : input.value);
+                input.blur();
+            }
         });
     });
-     helpBtn.addEventListener('click', () => helpModal.style.display = 'flex');
+
+    helpBtn.addEventListener('click', () => helpModal.style.display = 'flex');
     closeModalBtn.addEventListener('click', () => helpModal.style.display = 'none');
     window.addEventListener('click', (e) => { if (e.target === helpModal) helpModal.style.display = 'none'; });
     
-    // Correctly bind to the static list items in the sidebar
     document.querySelectorAll('#sidebarList .list-link').forEach(item => {
         item.addEventListener('click', () => {
             currentList = item.textContent;
