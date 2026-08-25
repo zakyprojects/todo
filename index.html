@@ -2,73 +2,493 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="./style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap"
-    rel="stylesheet" />
+  <meta charset="UTF-8">
+  <title>Todo SaaS &bull; Intelligent Productivity Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Futuristic, glassmorphic SaaS productivity dashboard and task management system built with the V2 Design System.">
 
-  <title>Todo by Zaky</title>
+  <!-- Typography & Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="./style.css">
   <link rel="shortcut icon" href="./favicon.ico" type="image/x-icon">
 </head>
 
 <body>
-  <button id="toggleBtn">☰</button>
-  <div id="sidebar">
-    <h1 class="bar">UserName</h1>
-    <ul id="sidebarList">
-      <li class="list-link">All</li>
-      <li class="list-link">Important</li>
-      <li class="list-link">Planned</li>
-    </ul>
+  <!-- Interactive Particle Canvas Engine (V2 Sync) -->
+  <canvas id="particle-canvas"></canvas>
 
-    <div class="singleline"></div>
+  <!-- Zero-Latency Custom Cursor Elements (V2 Sync) -->
+  <div class="cursor-dot" id="cursor-dot"></div>
+  <div class="cursor-ring" id="cursor-ring"></div>
 
-    <div class="scrollable-lists">
-      <form method="POST">
-        <ul id="listContainer">
-        </ul>
-        <li id="newList">➕ Add a New List</li>
+  <!-- Mobile Top Bar with Drawer Toggle -->
+  <header class="mobile-topbar">
+    <button id="toggleBtn" class="icon-btn" aria-label="Toggle Navigation Menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+    <div class="mobile-brand">
+      <span class="status-dot"></span>
+      <span class="brand-title">Nova<span class="brand-accent">Todo</span></span>
+    </div>
+    <button id="mobileHelpBtn" class="icon-btn" aria-label="Open Help">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+      </svg>
+    </button>
+  </header>
+
+  <!-- Backdrop overlay for mobile drawer -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <!-- Main App Shell -->
+  <div class="app-shell">
+    
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="sidebar">
+      <!-- Sidebar Fixed Top Header -->
+      <div class="sidebar-header">
+        <!-- User Profile Header -->
+        <div class="user-profile-card">
+          <div class="avatar-ring">
+            <span class="avatar-initials" id="avatarInitials">G</span>
+            <span class="status-dot avatar-status"></span>
+          </div>
+          <div class="user-info">
+            <div class="user-name-wrapper" title="Double click to edit name">
+              <h2 class="user-name" id="userNameDisplay">Guest</h2>
+              <input type="text" id="userNameInput" class="user-name-edit" maxlength="28" style="display: none;">
+            </div>
+            <div class="user-badge-wrapper" title="Double click to edit title or plan">
+              <span class="user-badge" id="userRoleDisplay">PRO MEMBER</span>
+              <input type="text" id="userRoleInput" class="user-badge-edit" maxlength="24" style="display: none;">
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Metrics Pill -->
+        <div class="metrics-card">
+          <div class="metric-item">
+            <span class="metric-value" id="totalPendingCount">0</span>
+            <span class="metric-label">Pending</span>
+          </div>
+          <div class="metric-divider"></div>
+          <div class="metric-item">
+            <span class="metric-value" id="totalCompletedCount">0</span>
+            <span class="metric-label">Completed</span>
+          </div>
+          <div class="metric-divider"></div>
+          <div class="metric-item">
+            <span class="metric-value text-accent" id="completionRate">0%</span>
+            <span class="metric-label">Done</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scrollable Navigation Body Container -->
+      <div class="sidebar-nav-body" id="sidebarNavBody">
+        <!-- Smart Views / Standard Filters -->
+        <div class="nav-section">
+          <span class="nav-section-title">Views</span>
+          <ul class="nav-list" id="standardFilters">
+            <li class="nav-item active" data-filter="all">
+              <div class="nav-item-left">
+                <span class="nav-icon">📁</span>
+                <span class="nav-label">All Tasks</span>
+              </div>
+              <span class="nav-count" id="countAll">0</span>
+            </li>
+            <li class="nav-item" data-filter="important">
+              <div class="nav-item-left">
+                <span class="nav-icon">⭐</span>
+                <span class="nav-label">Important</span>
+              </div>
+              <span class="nav-count badge-coral" id="countImportant">0</span>
+            </li>
+            <li class="nav-item" data-filter="planned">
+              <div class="nav-item-left">
+                <span class="nav-icon">📅</span>
+                <span class="nav-label">Planned</span>
+              </div>
+              <span class="nav-count badge-blue" id="countPlanned">0</span>
+            </li>
+            <li class="nav-item" data-filter="completed">
+              <div class="nav-item-left">
+                <span class="nav-icon">✅</span>
+                <span class="nav-label">Completed</span>
+              </div>
+              <span class="nav-count badge-green" id="countCompleted">0</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="nav-divider"></div>
+
+        <!-- Custom Lists Section -->
+        <div class="nav-section custom-lists-section">
+          <div class="nav-section-header">
+            <div class="nav-title-group">
+              <span class="nav-section-title">CUSTOM LISTS</span>
+              <span class="custom-lists-count-pill" id="customListsCount">0</span>
+            </div>
+            <button id="newListBtn" class="add-list-btn" title="Create New List">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>New List</span>
+            </button>
+          </div>
+          <ul class="nav-list scrollable-lists" id="listContainer">
+            <!-- Dynamic Custom Lists inserted by JS -->
+          </ul>
+        </div>
+      </div>
+
+      <!-- Sidebar Bottom Action Buttons -->
+      <div class="sidebar-footer-actions">
+        <button id="helpBtn" class="sidebar-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          <span>Shortcuts &amp; Guide</span>
+        </button>
+        <button id="clearCompletedBtn" class="sidebar-btn btn-danger-subtle" title="Clear all completed tasks">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+          <span>Clear Done</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Dashboard -->
+    <main class="main-content">
+      
+      <!-- Sleek Header -->
+      <header class="dashboard-header">
+        <div class="header-left">
+          <div class="view-badge" id="viewBadge">
+            <span class="status-dot"></span>
+            <span id="viewBadgeCategory">ALL TASKS</span>
+          </div>
+          <h1 class="active-list-title" id="activeListTitle">
+            All <span class="title-accent">Tasks</span>
+          </h1>
+          <p class="active-list-desc" id="activeListDesc">Manage, schedule, and execute your high-priority roadmap.</p>
+        </div>
+
+        <div class="header-actions">
+          <!-- Search Input -->
+          <div class="search-box">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="searchInput" placeholder="Filter tasks by text... (Press /)" autocomplete="off">
+            <button id="clearSearchBtn" class="clear-search-btn" style="display: none;">&times;</button>
+          </div>
+
+          <!-- Sort Selector -->
+          <div class="select-wrapper">
+            <select id="sortSelect" aria-label="Sort tasks">
+              <option value="created-desc">Newest First</option>
+              <option value="created-asc">Oldest First</option>
+              <option value="due-asc">Due Date (Earliest)</option>
+              <option value="priority">Priority First</option>
+              <option value="alphabetical">Alphabetical (A-Z)</option>
+            </select>
+          </div>
+        </div>
+      </header>
+
+      <!-- Productivity Progress Card -->
+      <section class="progress-card">
+        <div class="progress-meta">
+          <div class="progress-info">
+            <span class="progress-title">Execution Progress</span>
+            <span class="progress-subtitle" id="progressSubtitle">Calculating sprint velocity...</span>
+          </div>
+          <div class="progress-stats">
+            <span class="progress-count" id="progressCount">0 of 0 completed</span>
+            <span class="progress-pct" id="progressPercentage">0%</span>
+          </div>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="progressBarFill" style="width: 0%;">
+            <div class="progress-glow"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Task Stream Container -->
+      <section class="task-stream" id="taskStream">
+        <!-- Active Tasks Stream -->
+        <div class="tasks-group" id="activeTasksGroup">
+          <div class="tasks-container" id="tasksContainer">
+            <!-- Dynamic task cards will be rendered here -->
+          </div>
+        </div>
+
+        <!-- Empty State View -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+          <div class="empty-icon-wrap">
+            <span class="empty-icon">✨</span>
+          </div>
+          <h3 class="empty-title">All Systems Clear</h3>
+          <p class="empty-desc">No tasks found matching this view. Press <kbd class="kbd-hint">Enter</kbd> or use the input below to create one.</p>
+        </div>
+
+        <!-- Completed Tasks Section (Collapsible) -->
+        <div class="completed-section" id="completedSection" style="display: none;">
+          <button class="completed-toggle" id="completedToggle" aria-expanded="true">
+            <span class="toggle-arrow" id="completedArrow">&#9662;</span>
+            <span class="toggle-text">Completed Tasks</span>
+            <span class="completed-count-pill" id="completedPill">0</span>
+          </button>
+          <div class="completed-tasks-container" id="completedTasksContainer">
+            <!-- Completed task cards -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Floating Glassmorphic Add Task Action Bar -->
+      <section class="add-task-wrapper">
+        <form class="add-task-card" id="addTaskForm">
+          <div class="input-row">
+            <div class="input-icon-wrap">
+              <span class="plus-icon">⚡</span>
+            </div>
+            <input type="text" id="taskInput" class="task-main-input" placeholder="Add a new high-impact task... (Press Enter)" autocomplete="off" required>
+            
+            <!-- Quick Options Bar -->
+            <div class="quick-options">
+              <!-- List Selector Dropdown -->
+              <div class="quick-select-wrap" title="Assign to list">
+                <select id="quickListSelect" aria-label="Select List">
+                  <option value="inbox">📥 Inbox</option>
+                </select>
+              </div>
+
+              <!-- Quick Due Date Picker -->
+              <div class="quick-date-wrap" title="Set due date">
+                <input type="date" id="quickDueDate" class="quick-date-input" aria-label="Set Due Date">
+              </div>
+
+              <!-- Important Toggle Button -->
+              <button type="button" id="quickImportantBtn" class="quick-toggle-btn" title="Toggle Important Priority">
+                <span class="star-icon">☆</span>
+              </button>
+
+              <!-- Submit Button -->
+              <button type="submit" id="taskSubmitBtn" class="add-btn" title="Create Task">
+                <span>Add Task</span>
+                <span class="kbd-shortcut">&crarr;</span>
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <!-- Dock Attached Fixed Footer -->
+        <div class="dock-footer">
+          <span class="dock-footer-text">Designed &amp; Engineered by <strong>Zakria Muhammadzai</strong></span>
+          <span class="dock-footer-meta">&copy; 2026 NovaTodo &bull; V2 System</span>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- =========================================================================
+       MODALS
+       ========================================================================= -->
+
+  <!-- Task Detail & Notes Modal -->
+  <div class="modal-overlay" id="taskModal" role="dialog" aria-modal="true" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="card-badge badge-featured">Task Editor</span>
+          <h3 class="modal-heading">Edit Task Details</h3>
+        </div>
+        <button class="modal-close-btn" id="closeTaskModal" aria-label="Close modal">&times;</button>
+      </div>
+
+      <form id="editTaskForm" class="modal-body">
+        <input type="hidden" id="editTaskId">
+        
+        <div class="form-group">
+          <label for="editTaskText" class="form-label">Task Title</label>
+          <input type="text" id="editTaskText" class="form-input" required autocomplete="off">
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="editTaskList" class="form-label">List Assignment</label>
+            <select id="editTaskList" class="form-select">
+              <!-- Dynamic List options -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="editTaskDueDate" class="form-label">Due Date</label>
+            <input type="date" id="editTaskDueDate" class="form-input">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="label-row">
+            <label for="editTaskNotes" class="form-label">Notes &amp; Markdown Details</label>
+            <span class="label-hint">Optional context or sub-steps</span>
+          </div>
+          <textarea id="editTaskNotes" class="form-textarea" rows="4" placeholder="Add architectural notes, links, or execution details..."></textarea>
+        </div>
+
+        <div class="form-toggle-row">
+          <label class="toggle-label" for="editTaskImportant">
+            <input type="checkbox" id="editTaskImportant" class="toggle-checkbox">
+            <span class="toggle-text">Mark as High-Priority / Important (⭐)</span>
+          </label>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="deleteTaskModalBtn" class="btn-danger">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            <span>Delete Task</span>
+          </button>
+          <div class="footer-actions-right">
+            <button type="button" id="cancelTaskModalBtn" class="btn-secondary">Cancel</button>
+            <button type="submit" class="btn-primary">Save Changes</button>
+          </div>
+        </div>
       </form>
     </div>
-
-    <button id="helpBtn">❓ Help</button>
-
-  </div>
-  <div class="main-content">
-    <h1>Tasks</h1>
   </div>
 
-  <div id="addTask">
-    <form method="POST">
-      <input id="taskInput" type="text" name="task" placeholder="Add a new task" required autofocus>
-      <button id="taskInputBtn" type="submit">Add Task</button>
-    </form>
-  </div>
+  <!-- Create / Edit Custom List Modal -->
+  <div class="modal-overlay" id="listModal" role="dialog" aria-modal="true" style="display: none;">
+    <div class="modal-card modal-card-sm">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="card-badge badge-live">Lists Engine</span>
+          <h3 class="modal-heading" id="listModalHeading">Create Custom List</h3>
+        </div>
+        <button class="modal-close-btn" id="closeListModal" aria-label="Close modal">&times;</button>
+      </div>
 
-  <div id="helpModal" class="modal">
-    <div class="modal-content">
-      <span class="close-modal">&times;</span>
-      <h3>Application Help</h3>
-      <ul>
-        <li><strong>Rename Anything:</strong> Double-click (or double-tap on mobile) the "UserName" title, a list, or a
-          task to rename it.</li>
-        <li><strong>Complete a Task:</strong> Click the '✓' icon to complete a task. It will be removed permanently.
-        </li>
-        <li><strong>Add Notes:</strong> Click the '📝 Notes' button on a task to open the notes area.</li>
-        <li><strong>Set a Deadline:</strong> Use the calendar icon on a task to set a due date. Overdue tasks turn red,
-          and tasks due today turn amber.</li>
-      </ul>
+      <form id="customListForm" class="modal-body">
+        <input type="hidden" id="editCustomListId">
+
+        <div class="form-group">
+          <label for="customListName" class="form-label">List Name</label>
+          <input type="text" id="customListName" class="form-input" placeholder="e.g. Frontend Architecture" required maxlength="30" autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Select Icon</label>
+          <div class="icon-selector-grid" id="iconSelectorGrid">
+            <button type="button" class="icon-chip active" data-icon="📁">📁</button>
+            <button type="button" class="icon-chip" data-icon="🚀">🚀</button>
+            <button type="button" class="icon-chip" data-icon="💡">💡</button>
+            <button type="button" class="icon-chip" data-icon="⚙️">⚙️</button>
+            <button type="button" class="icon-chip" data-icon="🎯">🎯</button>
+            <button type="button" class="icon-chip" data-icon="🎨">🎨</button>
+            <button type="button" class="icon-chip" data-icon="🔒">🔒</button>
+            <button type="button" class="icon-chip" data-icon="📈">📈</button>
+            <button type="button" class="icon-chip" data-icon="⚡">⚡</button>
+            <button type="button" class="icon-chip" data-icon="🔥">🔥</button>
+            <button type="button" class="icon-chip" data-icon="🌟">🌟</button>
+            <button type="button" class="icon-chip" data-icon="🛠️">🛠️</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Accent Glow Color</label>
+          <div class="color-selector-grid" id="colorSelectorGrid">
+            <button type="button" class="color-chip active" data-color="#58a6ff" style="--chip-color: #58a6ff;"></button>
+            <button type="button" class="color-chip" data-color="#bc8cff" style="--chip-color: #bc8cff;"></button>
+            <button type="button" class="color-chip" data-color="#3fb950" style="--chip-color: #3fb950;"></button>
+            <button type="button" class="color-chip" data-color="#f85149" style="--chip-color: #f85149;"></button>
+            <button type="button" class="color-chip" data-color="#d29922" style="--chip-color: #d29922;"></button>
+            <button type="button" class="color-chip" data-color="#39c5bb" style="--chip-color: #39c5bb;"></button>
+            <button type="button" class="color-chip" data-color="#f778ba" style="--chip-color: #f778ba;"></button>
+            <button type="button" class="color-chip" data-color="#79c0ff" style="--chip-color: #79c0ff;"></button>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="cancelListModalBtn" class="btn-secondary">Cancel</button>
+          <button type="submit" class="btn-primary" id="saveListBtn">Create List</button>
+        </div>
+      </form>
     </div>
   </div>
 
-  <footer>
-    <p>Built with ❤️ by Zakria Khan</p>
-  </footer>
+  <!-- Help & Shortcuts Modal -->
+  <div class="modal-overlay" id="helpModal" role="dialog" aria-modal="true" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="card-badge badge-wip">Documentation</span>
+          <h3 class="modal-heading">Productivity Shortcuts &amp; Guide</h3>
+        </div>
+        <button class="modal-close-btn" id="closeHelpModal" aria-label="Close modal">&times;</button>
+      </div>
 
+      <div class="modal-body help-body">
+        <div class="help-section">
+          <h4 class="help-section-title">⚡ Keyboard Shortcuts</h4>
+          <div class="shortcuts-table">
+            <div class="shortcut-row">
+              <span class="shortcut-desc">Focus Task Input</span>
+              <div class="shortcut-keys"><kbd>/</kbd> or <kbd>N</kbd></div>
+            </div>
+            <div class="shortcut-row">
+              <span class="shortcut-desc">Create / Submit Task</span>
+              <div class="shortcut-keys"><kbd>Enter</kbd></div>
+            </div>
+            <div class="shortcut-row">
+              <span class="shortcut-desc">Close Active Modal / Drawer</span>
+              <div class="shortcut-keys"><kbd>Esc</kbd></div>
+            </div>
+            <div class="shortcut-row">
+              <span class="shortcut-desc">Save Task Notes in Modal</span>
+              <div class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>Enter</kbd></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="help-section">
+          <h4 class="help-section-title">✨ Power Features</h4>
+          <ul class="help-list">
+            <li><strong>Interactive Due Dates:</strong> Monospace deadline tracking with automatic Neon Coral glow (<code>#f85149</code>) when overdue.</li>
+            <li><strong>Task Editor:</strong> Double-click any task or click the edit icon to add rich markdown notes, change lists, or update due dates.</li>
+            <li><strong>Editable Profile:</strong> Double-click your username on the sidebar to personalize your profile name.</li>
+            <li><strong>Zero-Latency Custom Cursor:</strong> Equipped with precision Lerp physics (0.45 factor) and glassmorphism hover backdrop blur.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="helpCloseBtn" class="btn-primary" style="width: 100%;">Got it, Let's Build</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- App Core JavaScript Logic -->
   <script src="./script.js"></script>
 </body>
 
