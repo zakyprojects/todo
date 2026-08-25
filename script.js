@@ -1068,13 +1068,45 @@ document.addEventListener('DOMContentLoaded', () => {
     closeMobileSidebar();
   });
 
-  // Double click custom list to edit
+  // Double click custom list to edit (Desktop)
   el.listContainer.addEventListener('dblclick', (e) => {
     const item = e.target.closest('.custom-list-item');
     if (!item) return;
     const listId = item.dataset.filter;
     const targetList = customLists.find(l => l.id === listId);
     if (targetList) openEditListModal(targetList);
+  });
+
+  // Long-press custom list to edit (Mobile Touch)
+  let touchTimer = null;
+  let touchMoved = false;
+
+  el.listContainer.addEventListener('touchstart', (e) => {
+    // If tapping action button, let click handler take care of it
+    if (e.target.closest('.list-action-btn')) return;
+    const item = e.target.closest('.custom-list-item');
+    if (!item) return;
+
+    touchMoved = false;
+    const listId = item.dataset.filter;
+    const targetList = customLists.find(l => l.id === listId);
+    if (!targetList) return;
+
+    touchTimer = setTimeout(() => {
+      if (!touchMoved) {
+        if (navigator.vibrate) navigator.vibrate(40);
+        openEditListModal(targetList);
+      }
+    }, 550);
+  }, { passive: true });
+
+  el.listContainer.addEventListener('touchmove', () => {
+    touchMoved = true;
+    if (touchTimer) clearTimeout(touchTimer);
+  }, { passive: true });
+
+  el.listContainer.addEventListener('touchend', () => {
+    if (touchTimer) clearTimeout(touchTimer);
   });
 
   function deleteCustomList(listId) {
@@ -1262,6 +1294,11 @@ document.addEventListener('DOMContentLoaded', () => {
     el.sidebar.classList.toggle('open');
     el.sidebarBackdrop.classList.toggle('active');
   });
+
+  const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
+  if (sidebarCloseBtn) {
+    sidebarCloseBtn.addEventListener('click', closeMobileSidebar);
+  }
 
   el.sidebarBackdrop.addEventListener('click', closeMobileSidebar);
 
