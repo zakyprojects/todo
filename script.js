@@ -310,8 +310,10 @@ document.addEventListener('DOMContentLoaded', () => {
     sidebarBackdrop: document.getElementById('sidebarBackdrop'),
     userNameDisplay: document.getElementById('userNameDisplay'),
     userNameInput: document.getElementById('userNameInput'),
+    editUserNameBtn: document.getElementById('editUserNameBtn'),
     userRoleDisplay: document.getElementById('userRoleDisplay'),
     userRoleInput: document.getElementById('userRoleInput'),
+    editUserRoleBtn: document.getElementById('editUserRoleBtn'),
     avatarInitials: document.getElementById('avatarInitials'),
     totalPendingCount: document.getElementById('totalPendingCount'),
     totalCompletedCount: document.getElementById('totalCompletedCount'),
@@ -1165,8 +1167,15 @@ document.addEventListener('DOMContentLoaded', () => {
     render();
   });
 
-  // User Profile Name Editing (Double Click or Direct Click)
+  // User Profile Name Editing
   let isEditingUserName = false;
+
+  if (el.editUserNameBtn) {
+    el.editUserNameBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      enableUserNameEdit();
+    });
+  }
 
   if (el.userNameDisplay) {
     el.userNameDisplay.addEventListener('dblclick', enableUserNameEdit);
@@ -1227,8 +1236,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // User Profile Role/Badge Editing (Double Click)
+  // User Profile Role/Badge Editing
   let isEditingUserRole = false;
+
+  if (el.editUserRoleBtn) {
+    el.editUserRoleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      enableUserRoleEdit();
+    });
+  }
 
   if (el.userRoleDisplay) {
     el.userRoleDisplay.addEventListener('dblclick', enableUserRoleEdit);
