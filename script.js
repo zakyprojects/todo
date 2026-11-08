@@ -157,12 +157,29 @@
     e.preventDefault();
     var text = $('new-text').value.trim();
     if (!text) return;
-    state.tasks.unshift({ id: uid(), listId: state.current, text: text, done: false, due: $('new-due').value || '', notes: '', created: Date.now() });
+    state.tasks.unshift({ id: uid(), listId: state.current, text: text, done: false, due: $('new-due').value || '', notes: $('new-notes').value.trim(), created: Date.now() });
     save();
     $('new-text').value = '';
     $('new-due').value = '';
+    $('new-notes').value = '';
+    setNotesOpen(false);
     if (filter === 'done') setFilter('all'); else render();
     $('new-text').focus();
+  });
+
+  // Optional notes while adding: the toggle shows a notes box under the task field.
+  function setNotesOpen(open) {
+    $('new-notes').hidden = !open;
+    $('notes-toggle').setAttribute('aria-expanded', String(open));
+  }
+  $('notes-toggle').addEventListener('click', function () {
+    var open = $('new-notes').hidden;
+    setNotesOpen(open);
+    if (open) $('new-notes').focus(); else $('new-text').focus();
+  });
+  // Ctrl/Cmd + Enter in the notes box adds the task (plain Enter makes a new line).
+  $('new-notes').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); $('add').requestSubmit(); }
   });
 
   // ---------- Filter ----------
@@ -371,6 +388,7 @@
     if (!t) { selectedId = null; document.body.classList.remove('details-open'); }
     $('details-empty').hidden = !!t;
     $('details-body').hidden = !t;
+    $('done-toggle').hidden = !t;
     if (!t) return;
     var active = document.activeElement;
     if (active !== $('d-text')) $('d-text').value = t.text;

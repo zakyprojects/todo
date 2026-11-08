@@ -33,7 +33,7 @@
   <div class="app">
     <!-- Lists -->
     <nav class="lists" aria-label="Lists">
-      <div class="lists-head">
+      <div class="col-head lists-head">
         <h2>Lists</h2>
         <button type="button" class="icon-btn small" id="new-list-btn" aria-label="New list">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
@@ -48,21 +48,29 @@
 
     <!-- Tasks of the chosen list -->
     <main class="tasks">
-      <p id="today" class="today"></p>
-      <div class="list-title-row">
+      <div class="col-head list-title-row">
         <label class="sr-only" for="list-title">List name</label>
         <input id="list-title" class="list-title" type="text" maxlength="40" title="Click to rename this list">
         <button type="button" class="icon-btn small" id="delete-list-btn" aria-label="Delete this list">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>
         </button>
       </div>
+      <p id="today" class="today"></p>
 
       <form id="add" class="add" autocomplete="off">
         <label class="sr-only" for="new-text">New task</label>
         <input id="new-text" type="text" maxlength="200" placeholder="Add a task, then press Enter" required>
-        <label class="sr-only" for="new-due">Due date (optional)</label>
-        <input id="new-due" type="date" title="Due date (optional)">
-        <button class="btn-add" type="submit">Add</button>
+        <label class="sr-only" for="new-notes">Notes (optional)</label>
+        <textarea id="new-notes" rows="3" maxlength="4000" placeholder="Notes (optional)" hidden></textarea>
+        <div class="add-bar">
+          <label class="sr-only" for="new-due">Due date (optional)</label>
+          <input id="new-due" type="date" title="Due date (optional)">
+          <button type="button" class="notes-toggle" id="notes-toggle" aria-expanded="false" aria-controls="new-notes">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+            Notes
+          </button>
+          <button class="btn-add" type="submit">Add</button>
+        </div>
       </form>
 
       <div class="bar">
@@ -83,19 +91,19 @@
 
     <!-- Details of the chosen task -->
     <aside class="details" id="details" aria-label="Task details">
+      <div class="col-head details-head">
+        <h2 class="details-title">Details</h2>
+        <button type="button" class="back" id="details-back">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+          Back
+        </button>
+        <label class="done-toggle" id="done-toggle" hidden><input type="checkbox" class="check" id="d-done"> <span>Done</span></label>
+      </div>
       <div class="details-empty" id="details-empty">
         <p>Pick a task to see its details and notes.</p>
       </div>
       <form class="details-body" id="details-body" hidden autocomplete="off">
-        <div class="details-head">
-          <button type="button" class="back" id="details-back">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
-            Back
-          </button>
-          <label class="done-toggle"><input type="checkbox" class="check" id="d-done"> <span>Done</span></label>
-        </div>
-
-        <label class="field-label" for="d-text">Task</label>
+        <label class="field-label first" for="d-text">Task</label>
         <textarea id="d-text" class="d-text" rows="2" maxlength="200"></textarea>
 
         <div class="field-row">
