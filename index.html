@@ -3,16 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Todo, a simple task list</title>
-  <meta name="description" content="A simple todo app: make your own lists, add tasks with due dates and notes, tick them off and filter. Saved in your browser.">
+  <title>Todo: Simple To-Do List App | zakyprojects</title>
+  <meta name="description" content="A free, simple to-do list app: make your own lists, add tasks with due dates and notes, tick them off and filter. Saved in your browser.">
   <link rel="canonical" href="https://zakyprojects.github.io/todo/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Zakria Khan">
-  <meta property="og:title" content="Todo, a simple task list">
-  <meta property="og:description" content="A simple todo app: make your own lists, add tasks with due dates and notes, tick them off and filter. Saved in your browser.">
+  <meta property="og:title" content="Todo: Simple To-Do List App | zakyprojects">
+  <meta property="og:description" content="A free, simple to-do list app: make your own lists, add tasks with due dates and notes, tick them off and filter. Saved in your browser.">
   <meta property="og:url" content="https://zakyprojects.github.io/todo/">
-  <meta name="twitter:card" content="summary">
-  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Todo", "url": "https://zakyprojects.github.io/todo/", "description": "A simple todo app: make your own lists, add tasks with due dates and notes, tick them off and filter. Saved in your browser.", "applicationCategory": "ProductivityApplication", "operatingSystem": "Any", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "author": {"@type": "Person", "name": "Zakria Khan", "url": "https://zakyprojects.github.io/"}}</script>
+  <meta property="og:image" content="https://zakyprojects.github.io/todo/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Todo", "url": "https://zakyprojects.github.io/todo/", "description": "A free, simple to-do list app: make your own lists, add tasks with due dates and notes, tick them off and filter. Saved in your browser.", "applicationCategory": "ProductivityApplication", "operatingSystem": "Any", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "author": {"@type": "Person", "name": "Zakria Khan", "url": "https://zakyprojects.github.io/"}}</script>
   <meta name="theme-color" content="#fbfaf9">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preload" href="fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
@@ -25,6 +28,7 @@
       if (t === 'dark') document.documentElement.dataset.theme = 'dark';
     } catch (e) {}
   </script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Is Todo free?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. It is free and needs no account."}}, {"@type": "Question", "name": "Where are my tasks saved?", "acceptedAnswer": {"@type": "Answer", "text": "Only in this browser on your device. If you clear your browser data, they are gone."}}, {"@type": "Question", "name": "Can I use it on my phone?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. The page works on phones and computers."}}, {"@type": "Question", "name": "Who made it?", "acceptedAnswer": {"@type": "Answer", "text": "Zakria Khan, a web developer. You can see his other projects on zakyprojects.github.io."}}]}</script>
 </head>
 <body>
   <header class="top">
@@ -56,6 +60,7 @@
 
     <!-- Tasks of the chosen list -->
     <main class="tasks">
+    <h1 class="sr-only">Todo, a simple to-do list</h1>
       <div class="col-head list-title-row">
         <label class="sr-only" for="list-title">List name</label>
         <input id="list-title" class="list-title" type="text" maxlength="40" title="Click to rename this list">
@@ -136,7 +141,23 @@
     </aside>
   </div>
 
-  <footer class="foot">
+  <section class="about" aria-labelledby="about-title">
+    <h2 id="about-title">About Todo</h2>
+    <p>Todo is a simple to-do list app. Make your own lists, add tasks with due dates and notes, tick them off and filter them. It is a practice project by Zakria Khan (zakyprojects).</p>
+    <h3>How to use</h3>
+    <ol>
+      <li>Make a list, or use the one that is already there.</li>
+      <li>Add a task, then open it to set a due date or write a note.</li>
+      <li>Tick a task when it is done, and use the filters to see what is left.</li>
+    </ol>
+    <h3>Questions</h3>
+    <details><summary>Is Todo free?</summary><p>Yes. It is free and needs no account.</p></details>
+    <details><summary>Where are my tasks saved?</summary><p>Only in this browser on your device. If you clear your browser data, they are gone.</p></details>
+    <details><summary>Can I use it on my phone?</summary><p>Yes. The page works on phones and computers.</p></details>
+    <details><summary>Who made it?</summary><p>Zakria Khan, a web developer. You can see his other projects on zakyprojects.github.io.</p></details>
+  </section>
+
+<footer class="foot">
     <p>Built by <a href="https://zakyprojects.github.io/">Zakria Khan</a>. Your tasks are saved only in this browser.</p>
     <p><a href="https://github.com/zakyprojects/todo">Source code</a></p>
   </footer>
