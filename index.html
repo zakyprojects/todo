@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Todo, a simple task list</title>
-  <meta name="description" content="A simple todo list: add tasks, set a due date, tick them off and filter. Saved in your browser.">
+  <meta name="description" content="A simple todo app: make your own lists, add tasks with due dates and notes, tick them off and filter. Saved in your browser.">
   <meta name="theme-color" content="#fbfaf9">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preload" href="fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
@@ -19,7 +19,7 @@
   </script>
 </head>
 <body>
-  <header class="top wrap">
+  <header class="top">
     <a class="brand" href="./">
       <svg width="22" height="22" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--accent)"/><path d="M9.5 16.5l4.2 4.2 8.8-9.4" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       Todo
@@ -30,36 +30,97 @@
     </button>
   </header>
 
-  <main class="wrap">
-    <p id="today" class="today"></p>
-    <h1 id="headline">Your tasks</h1>
-
-    <form id="add" class="add" autocomplete="off">
-      <label class="sr-only" for="new-text">New task</label>
-      <input id="new-text" type="text" maxlength="200" placeholder="Add a task, then press Enter" required>
-      <label class="sr-only" for="new-due">Due date (optional)</label>
-      <input id="new-due" type="date" title="Due date (optional)">
-      <button class="btn-add" type="submit">Add</button>
-    </form>
-
-    <div class="bar">
-      <div class="tabs" role="group" aria-label="Show">
-        <button type="button" data-filter="all" aria-pressed="true">All</button>
-        <button type="button" data-filter="active" aria-pressed="false">To do</button>
-        <button type="button" data-filter="done" aria-pressed="false">Done</button>
+  <div class="app">
+    <!-- Lists -->
+    <nav class="lists" aria-label="Lists">
+      <div class="lists-head">
+        <h2>Lists</h2>
+        <button type="button" class="icon-btn small" id="new-list-btn" aria-label="New list">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
       </div>
-      <p id="count" class="count" aria-live="polite"></p>
-    </div>
+      <form id="new-list-form" class="new-list" hidden autocomplete="off">
+        <label class="sr-only" for="new-list-name">List name</label>
+        <input id="new-list-name" type="text" maxlength="40" placeholder="List name, then Enter">
+      </form>
+      <ul id="list-nav" class="list-nav"></ul>
+    </nav>
 
-    <ul id="list" class="list"></ul>
-    <p id="empty" class="empty" hidden></p>
+    <!-- Tasks of the chosen list -->
+    <main class="tasks">
+      <p id="today" class="today"></p>
+      <div class="list-title-row">
+        <label class="sr-only" for="list-title">List name</label>
+        <input id="list-title" class="list-title" type="text" maxlength="40" title="Click to rename this list">
+        <button type="button" class="icon-btn small" id="delete-list-btn" aria-label="Delete this list">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>
+        </button>
+      </div>
 
-    <div class="list-foot" id="list-foot" hidden>
-      <button type="button" id="clear-done" class="link-btn">Clear done tasks</button>
-    </div>
-  </main>
+      <form id="add" class="add" autocomplete="off">
+        <label class="sr-only" for="new-text">New task</label>
+        <input id="new-text" type="text" maxlength="200" placeholder="Add a task, then press Enter" required>
+        <label class="sr-only" for="new-due">Due date (optional)</label>
+        <input id="new-due" type="date" title="Due date (optional)">
+        <button class="btn-add" type="submit">Add</button>
+      </form>
 
-  <footer class="foot wrap">
+      <div class="bar">
+        <div class="tabs" role="group" aria-label="Show">
+          <button type="button" data-filter="all" aria-pressed="true">All</button>
+          <button type="button" data-filter="active" aria-pressed="false">To do</button>
+          <button type="button" data-filter="done" aria-pressed="false">Done</button>
+        </div>
+        <p id="count" class="count" aria-live="polite"></p>
+      </div>
+
+      <ul id="list" class="list"></ul>
+      <p id="empty" class="empty" hidden></p>
+      <div class="list-foot" id="list-foot" hidden>
+        <button type="button" id="clear-done" class="link-btn">Clear done tasks</button>
+      </div>
+    </main>
+
+    <!-- Details of the chosen task -->
+    <aside class="details" id="details" aria-label="Task details">
+      <div class="details-empty" id="details-empty">
+        <p>Pick a task to see its details and notes.</p>
+      </div>
+      <form class="details-body" id="details-body" hidden autocomplete="off">
+        <div class="details-head">
+          <button type="button" class="back" id="details-back">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+            Back
+          </button>
+          <label class="done-toggle"><input type="checkbox" class="check" id="d-done"> <span>Done</span></label>
+        </div>
+
+        <label class="field-label" for="d-text">Task</label>
+        <textarea id="d-text" class="d-text" rows="2" maxlength="200"></textarea>
+
+        <div class="field-row">
+          <div>
+            <label class="field-label" for="d-due">Due date</label>
+            <input id="d-due" type="date">
+          </div>
+          <div>
+            <label class="field-label" for="d-list">List</label>
+            <select id="d-list"></select>
+          </div>
+        </div>
+
+        <label class="field-label" for="d-notes">Notes</label>
+        <textarea id="d-notes" class="d-notes" rows="8" maxlength="4000" placeholder="Add details, links or steps"></textarea>
+
+        <div class="details-foot">
+          <span id="d-created" class="muted"></span>
+          <button type="button" class="danger-btn" id="d-delete">Delete task</button>
+        </div>
+      </form>
+    </aside>
+  </div>
+
+  <footer class="foot">
     <p>Built by <a href="https://zakyprojects.github.io/">Zakria Khan</a>. Your tasks are saved only in this browser.</p>
     <p><a href="https://github.com/zakyprojects/todo">Source code</a></p>
   </footer>
