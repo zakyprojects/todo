@@ -33,7 +33,7 @@
     }
     var ids = lists.map(function (l) { return l.id; });
     tasks = tasks.filter(function (t) { return t && typeof t.id === 'string' && typeof t.text === 'string'; });
-    tasks.forEach(function (t) { if (ids.indexOf(t.listId) < 0) t.listId = ids[0]; if (typeof t.notes !== 'string') t.notes = ''; });
+    tasks.forEach(function (t) { if (ids.indexOf(t.listId) < 0) t.listId = ids[0]; if (typeof t.notes !== 'string') t.notes = ''; if (!(+t.created > 0)) t.created = Date.now(); });
     var current = localStorage.getItem(KEYS.current);
     return { lists: lists, tasks: tasks, current: ids.indexOf(current) >= 0 ? current : ids[0] };
   }
